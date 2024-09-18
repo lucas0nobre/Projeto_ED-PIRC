@@ -3,6 +3,7 @@ Sistema de gerenciamento de tarefas
 
 Felipe Antonio Ramalho Macedo
 felipe.macedo@academico.ifpb.edu.br
+
 Lucas Alves da Nobrega
 alves.nobrega@academico.ifpb.edu.br
 
