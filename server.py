@@ -1,5 +1,6 @@
 import socket  # Biblioteca para comunicação de rede
 import threading  # Biblioteca para trabalhar com múltiplas threads (concorrência)
+from ListaEncadeada import Lista  # Importa a lista duplamente encadeada
 
 # Classe que define uma tarefa
 class Tarefa:
@@ -14,13 +15,15 @@ class GerenciadorTarefas:
         self.tarefas = {}  # Dicionário para armazenar as tarefas com ID como chave
         self.trava = threading.Lock()  # Lock para evitar problemas de concorrência entre threads
         self.contador = 0  # Contador para gerar IDs únicos para as tarefas
-    
+        self.historico = Lista()  # Lista para armazenar o histórico de comandos
+
     # Método para criar uma nova tarefa
     def criar_tarefa(self, nome, descricao):
         with self.trava:  # Garante que apenas uma thread por vez executa essa parte do código
             self.contador += 1  # Incrementa o ID da próxima tarefa
             tarefa = Tarefa(self.contador, nome, descricao)  # Cria a tarefa
             self.tarefas[self.contador] = tarefa  # Adiciona a tarefa ao dicionário
+            self.historico.append(f"criar|{nome}|{descricao}")  # Adiciona ao histórico
             return self.contador  # Retorna o ID da tarefa criada
 
     # Método para ler uma tarefa específica ou todas as tarefas
@@ -36,6 +39,7 @@ class GerenciadorTarefas:
                 tarefa = self.tarefas[id_tarefa]  # Recupera a tarefa
                 tarefa.nome = nome  # Atualiza o nome da tarefa
                 tarefa.descricao = descricao  # Atualiza a descrição da tarefa
+                self.historico.append(f"atualizar|{id_tarefa}|{nome}|{descricao}")  # Adiciona ao histórico
                 return True  # Retorna True se a tarefa foi atualizada
             return False  # Retorna False se a tarefa não foi encontrada
 
@@ -44,13 +48,18 @@ class GerenciadorTarefas:
         with self.trava:  # Garante que a exclusão seja segura entre threads
             if id_tarefa in self.tarefas:  # Verifica se a tarefa existe
                 del self.tarefas[id_tarefa]  # Remove a tarefa do dicionário
+                self.historico.append(f"deletar|{id_tarefa}")  # Adiciona ao histórico
                 return True  # Retorna True se a tarefa foi excluída
             return False  # Retorna False se a tarefa não foi encontrada
 
+    # Método para ler o histórico de comandos
+    def ler_historico(self):
+        return list(self.historico)  # Retorna o histórico como uma lista
+
 # Função para processar as requisições enviadas pelo cliente
 def processar_requisicao(requisicao, gerenciador_tarefas):
-    partes = requisicao.split("|")  # Divide a requisição por "|", que separa o comando dos parâmetros
-    comando = partes[0].lower()  # Obtém o comando (criar, ler, atualizar, excluir)
+    partes = requisicao.split("|")  # Divide a requisição por "|"
+    comando = partes[0].lower()  # Obtém o comando
 
     try:
         # Comando para criar uma nova tarefa
@@ -84,20 +93,25 @@ def processar_requisicao(requisicao, gerenciador_tarefas):
                 return "Tarefa não encontrada"  # Tarefa não foi encontrada
         
         # Comando para excluir uma tarefa
-        elif comando == "excluir":
+        elif comando == "deletar":
+            if len(partes) < 2:  # Verifica se um ID foi fornecido
+                return "Erro: ID da tarefa não foi fornecido"
             id_tarefa = int(partes[1])  # Obtém o ID da tarefa
             if gerenciador_tarefas.excluir_tarefa(id_tarefa):
                 return "Tarefa excluída com sucesso"  # Retorna confirmação de exclusão
             else:
                 return "Tarefa não encontrada"  # Tarefa não foi encontrada
         
+        # Comando para ler o histórico
+        elif comando == "historico":
+            historico = gerenciador_tarefas.ler_historico()  # Lê o histórico de comandos
+            return "\n".join(historico) if historico else "Nenhum comando registrado"  # Retorna o histórico
+        
         else:
             return "Comando inválido"  # Comando desconhecido
 
-    # Tratamento de exceção caso os parâmetros sejam insuficientes
     except IndexError:
         return "Erro: parâmetros insuficientes"
-    # Tratamento de exceção caso o ID não seja um número
     except ValueError:
         return "Erro: ID da tarefa deve ser um número"
 
@@ -141,4 +155,5 @@ def iniciar_servidor():
 
 # Ponto de entrada do programa
 if __name__ == "__main__":
-    iniciar_servidor()  # Inicia o servidor quando o script é executado
+    iniciar_servidor()
+
