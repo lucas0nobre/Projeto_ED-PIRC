@@ -1,11 +1,20 @@
 import socket  # Biblioteca para comunicação em rede
-from ListaEncadeada import Lista  # Importa a lista duplamente encadeada
+from network_utils import enviar_comando, receber_resposta  # Funções de rede
+from command_processor import processar_comando  # Função para processar e validar comandos
+from history_manager import GerenciadorHistorico  # Gerenciamento do histórico de comandos
 
 # Função para estabelecer a conexão com o servidor
 def conectar_ao_servidor():
+    """
+    Tenta se conectar ao servidor em 'localhost' na porta 65432.
+    
+    Returns:
+        socket ou None: Retorna o objeto socket se a conexão for bem-sucedida,
+        ou None se houver algum erro de conexão.
+    """
     try:
         cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        cliente_socket.connect(('localhost', 65432))
+        cliente_socket.connect(('localhost', 65432))  # Conectando ao servidor no localhost
         print("Cliente conectado ao servidor.")
         return cliente_socket
     except ConnectionRefusedError:
@@ -15,65 +24,33 @@ def conectar_ao_servidor():
         print(f"Ocorreu um erro inesperado: {e}")
         return None
 
-# Função para enviar comandos ao servidor
-def enviar_comando(cliente_socket, comando):
-    try:
-        cliente_socket.sendall(comando.encode())
-    except BrokenPipeError:
-        print("Erro: Conexão com o servidor foi perdida.")
-        return False
-    except Exception as e:
-        print(f"Erro ao enviar comando: {e}")
-        return False
-    return True
-
-# Função para receber a resposta do servidor
-def receber_resposta(cliente_socket):
-    try:
-        resposta = cliente_socket.recv(1024).decode()
-        return resposta
-    except ConnectionResetError:
-        print("Erro: Conexão com o servidor foi encerrada.")
-    except Exception as e:
-        print(f"Erro ao receber resposta: {e}")
-    return None
-
-# Função para processar e formatar o comando digitado pelo usuário
-def processar_comando(comando):
-    partes_comando = comando.split()
-    if partes_comando[0].lower() == "criar" and len(partes_comando) >= 3:
-        return f"criar|{partes_comando[1]}|{' '.join(partes_comando[2:])}"
-    elif partes_comando[0].lower() == "atualizar" and len(partes_comando) >= 4:
-        return f"atualizar|{partes_comando[1]}|{partes_comando[2]}|{' '.join(partes_comando[3:])}"
-    elif partes_comando[0].lower() == "deletar" and len(partes_comando) == 2:
-        return f"deletar|{partes_comando[1]}"  # Mantido como 'deletar'
-    elif partes_comando[0].lower() == "ler":
-        if len(partes_comando) == 2:
-            return f"ler|{partes_comando[1]}"
-        else:
-            return "ler"
-    else:
-        print("Comando inválido. Tente novamente.")
-        return None
-
 # Função principal que inicia o cliente
 def iniciar_cliente():
+    """
+    Função principal que gerencia a conexão com o servidor, processa os comandos,
+    mantém o histórico e exibe as respostas recebidas do servidor.
+    """
     cliente_socket = conectar_ao_servidor()
     if not cliente_socket:
-        return
+        return  # Sai se não conseguir conectar ao servidor
 
-    # Inicializa a lista duplamente encadeada para o histórico de comandos
-    historico = Lista()
+    gerenciador_historico = GerenciadorHistorico()  # Inicializa o gerenciador de histórico
 
     print("Comandos disponíveis: criar <nome> <descrição>, ler [id], atualizar <id> <nome> <descrição>, deletar <id>")
     print("Digite 'sair' para encerrar o cliente.")
+    print("Digite 'historico' para ver os comandos enviados.")
 
     while True:
         comando = input("\nDigite o comando: ").strip()
 
         if comando.lower() == 'sair':
             print("Encerrando a conexão...")
-            break
+            break  # Sai do loop se o usuário digitar 'sair'
+
+        if comando.lower() == 'historico':
+            # Exibe o histórico de comandos
+            gerenciador_historico.exibir_historico()
+            continue
 
         if not comando:
             print("Comando vazio! Tente novamente.")
@@ -84,15 +61,15 @@ def iniciar_cliente():
             continue
 
         if not enviar_comando(cliente_socket, comando_processado):
-            break
+            break  # Sai do loop se não conseguir enviar o comando
 
         resposta = receber_resposta(cliente_socket)
         if resposta:
             print(f"Resposta do servidor: {resposta}")
             # Armazena o comando no histórico
-            historico.append(comando_processado)
+            gerenciador_historico.adicionar_ao_historico(comando_processado)
         else:
-            break
+            break  # Sai do loop se a resposta for None
 
     cliente_socket.close()
 
