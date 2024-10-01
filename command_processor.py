@@ -1,6 +1,4 @@
-# command_processor.py
-
-def processar_comando(comando):
+def processar_comando(comando: str):
     """
     Processa o comando digitado pelo usuário e o formata de acordo com o protocolo esperado pelo servidor.
     
@@ -8,7 +6,7 @@ def processar_comando(comando):
         comando (str): O comando digitado pelo usuário.
     
     Returns:
-        str: O comando formatado ou None se o comando for inválido.
+        Optional[str]: O comando formatado ou None se o comando for inválido.
     """
     partes_comando = comando.split()
     

@@ -1,5 +1,3 @@
-# history_manager.py
-
 from estruturas.ListaEncadeada import Lista
 
 class GerenciadorHistorico:
@@ -9,10 +7,10 @@ class GerenciadorHistorico:
     Attributes:
         historico (Lista): Lista encadeada que armazena os comandos.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.historico = Lista()
 
-    def adicionar_ao_historico(self, comando):
+    def adicionar_ao_historico(self, comando: str) -> None:
         """
         Adiciona um comando ao histórico.
 
@@ -21,7 +19,7 @@ class GerenciadorHistorico:
         """
         self.historico.append(comando)
 
-    def exibir_historico(self):
+    def exibir_historico(self) -> None:
         """
         Exibe o histórico de comandos em formato numerado.
 

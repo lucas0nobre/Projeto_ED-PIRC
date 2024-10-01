@@ -1,12 +1,11 @@
-# network_utils.py
 import socket
 
-def enviar_comando(cliente_socket, comando):
+def enviar_comando(cliente_socket: socket.socket, comando: str) -> bool:
     """
     Envia um comando do cliente ao servidor.
 
     Args:
-        cliente_socket (socket): Socket da conexão com o servidor.
+        cliente_socket (socket.socket): Socket da conexão com o servidor.
         comando (str): O comando que será enviado ao servidor.
 
     Returns:
@@ -22,12 +21,12 @@ def enviar_comando(cliente_socket, comando):
         return False
     return True
 
-def receber_resposta(cliente_socket):
+def receber_resposta(cliente_socket: socket.socket) -> str:
     """
     Recebe a resposta do servidor após o envio do comando.
 
     Args:
-        cliente_socket (socket): Socket da conexão com o servidor.
+        cliente_socket (socket.socket): Socket da conexão com o servidor.
 
     Returns:
         str: A resposta recebida do servidor ou None se houver algum erro.

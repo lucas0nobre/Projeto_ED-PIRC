@@ -2,7 +2,7 @@ import socket
 import threading
 from gerenciador_tarefas import GerenciadorTarefas
 
-def processar_requisicao(requisicao, gerenciador_tarefas):
+def processar_requisicao(requisicao: str, gerenciador_tarefas: GerenciadorTarefas) -> str:
     """
     Processa as requisições enviadas pelo cliente, baseadas no protocolo.
 
@@ -59,12 +59,12 @@ def processar_requisicao(requisicao, gerenciador_tarefas):
     except ValueError:
         return "Erro: ID da tarefa deve ser um número"
 
-def lidar_com_cliente(conn, addr, gerenciador_tarefas):
+def lidar_com_cliente(conn: socket.socket, addr: tuple, gerenciador_tarefas: GerenciadorTarefas) -> None:
     """
     Lida com cada cliente individualmente, processando as requisições enviadas.
 
     Args:
-        conn (socket): Socket de comunicação com o cliente.
+        conn (socket.socket): Socket de comunicação com o cliente.
         addr (tuple): Endereço do cliente.
         gerenciador_tarefas (GerenciadorTarefas): Instância do gerenciador de tarefas.
     """
@@ -82,7 +82,7 @@ def lidar_com_cliente(conn, addr, gerenciador_tarefas):
         conn.close()
         print(f"Conexão com {addr} encerrada")
 
-def iniciar_servidor():
+def iniciar_servidor() -> None:
     """
     Inicia o servidor e fica em modo de escuta para aceitar conexões de clientes.
     """

@@ -11,7 +11,7 @@ class Tarefa:
         nome (str): Nome da tarefa.
         descricao (str): Descrição da tarefa.
     """
-    def __init__(self, id_tarefa, nome, descricao):
+    def __init__(self, id_tarefa: int, nome: str, descricao: str) -> None:
         self.id_tarefa = id_tarefa
         self.nome = nome
         self.descricao = descricao
@@ -27,13 +27,13 @@ class GerenciadorTarefas:
         contador (int): Contador para gerar IDs únicos.
         historico (Lista): Armazena o histórico de comandos executados.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.tarefas = HashTable()  # Utiliza tabela hash personalizada
         self.trava = Lock()  # Lock para evitar concorrência
         self.contador = 0  # Contador para gerar IDs únicos
         self.historico = Lista()  # Lista encadeada para armazenar o histórico de comandos
 
-    def criar_tarefa(self, nome, descricao):
+    def criar_tarefa(self, nome: str, descricao: str) -> int:
         """
         Cria uma nova tarefa com um nome e descrição fornecidos.
 
@@ -51,7 +51,7 @@ class GerenciadorTarefas:
             self.historico.append(f"criar|{nome}|{descricao}")
             return self.contador
 
-    def ler_tarefa(self, id_tarefa=None):
+    def ler_tarefa(self, id_tarefa: int = None):
         """
         Lê uma tarefa específica pelo ID ou retorna todas as tarefas.
 
@@ -59,7 +59,7 @@ class GerenciadorTarefas:
             id_tarefa (int, optional): ID da tarefa a ser lida. Defaults to None.
 
         Returns:
-            Tarefa ou lista de tarefas: Retorna a tarefa específica ou todas as tarefas.
+            Union[Tarefa, List[Tarefa], None]: Retorna a tarefa específica ou todas as tarefas, ou None se não encontrada.
         """
         if id_tarefa:
             try:
@@ -68,7 +68,7 @@ class GerenciadorTarefas:
                 return None
         return self.tarefas.items()
 
-    def atualizar_tarefa(self, id_tarefa, nome, descricao):
+    def atualizar_tarefa(self, id_tarefa: int, nome: str, descricao: str) -> bool:
         """
         Atualiza o nome e a descrição de uma tarefa existente.
 
@@ -90,7 +90,7 @@ class GerenciadorTarefas:
                 return True
             return False
 
-    def excluir_tarefa(self, id_tarefa):
+    def excluir_tarefa(self, id_tarefa: int) -> bool:
         """
         Exclui uma tarefa com base no ID fornecido.
 
@@ -112,6 +112,6 @@ class GerenciadorTarefas:
         Retorna o histórico de comandos executados.
 
         Returns:
-            list: Lista com os comandos executados.
+            List[str]: Lista com os comandos executados.
         """
         return list(self.historico)
