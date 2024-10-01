@@ -1,15 +1,17 @@
 import socket  # Biblioteca para comunicação em rede
+from typing import Optional
+from estruturas.ListaEncadeada import Lista  # Importa a lista duplamente encadeada
 from network_utils import enviar_comando, receber_resposta  # Funções de rede
 from command_processor import processar_comando  # Função para processar e validar comandos
 from history_manager import GerenciadorHistorico  # Gerenciamento do histórico de comandos
 
 # Função para estabelecer a conexão com o servidor
-def conectar_ao_servidor():
+def conectar_ao_servidor() -> Optional[socket.socket]:
     """
     Tenta se conectar ao servidor em 'localhost' na porta 65432.
     
     Returns:
-        socket ou None: Retorna o objeto socket se a conexão for bem-sucedida,
+        Optional[socket.socket]: Retorna o objeto socket se a conexão for bem-sucedida,
         ou None se houver algum erro de conexão.
     """
     try:
@@ -25,10 +27,13 @@ def conectar_ao_servidor():
         return None
 
 # Função principal que inicia o cliente
-def iniciar_cliente():
+def iniciar_cliente() -> None:
     """
     Função principal que gerencia a conexão com o servidor, processa os comandos,
     mantém o histórico e exibe as respostas recebidas do servidor.
+    
+    Returns:
+        None
     """
     cliente_socket = conectar_ao_servidor()
     if not cliente_socket:
