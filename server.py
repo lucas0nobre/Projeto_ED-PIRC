@@ -17,15 +17,16 @@ def processar_requisicao(requisicao: str, gerenciador_tarefas: GerenciadorTarefa
     comando = partes[0].lower()
 
     # Verifica se não há nenhuma tarefa criada para comandos que exigem tarefas
-    if comando in ['ler', 'atualizar', 'deletar'] and not gerenciador_tarefas.tarefas.items():
-        return "205|Nenhuma tarefa foi criada ainda."
+    if comando in ['ler', 'atualizar', 'deletar']:
+        if not gerenciador_tarefas.tarefas.items():
+            return "205|Nenhuma tarefa foi criada ainda."
 
     try:
         if comando == "criar":
             nome_tarefa = partes[1]
             descricao = partes[2]
             id_tarefa = gerenciador_tarefas.criar_tarefa(nome_tarefa, descricao)
-            return f"201|Tarefa criada com sucesso. ID: {id_tarefa}"
+            return f"201|ID: {id_tarefa}"
         
         elif comando == "ler":
             id_tarefa = int(partes[1])
@@ -39,13 +40,13 @@ def processar_requisicao(requisicao: str, gerenciador_tarefas: GerenciadorTarefa
             nome_tarefa = partes[2]
             descricao = partes[3]
             if gerenciador_tarefas.atualizar_tarefa(id_tarefa, nome_tarefa, descricao):
-                return "202|Tarefa atualizada com sucesso."
+                return "202|"
             return "404|Tarefa não existe."
         
         elif comando == "deletar":
             id_tarefa = int(partes[1])
             if gerenciador_tarefas.excluir_tarefa(id_tarefa):
-                return "204|Tarefa excluída com sucesso."
+                return "204|"
             return "404|Tarefa não existe."
         
         elif comando == "historico":

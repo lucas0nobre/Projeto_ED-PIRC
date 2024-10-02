@@ -11,7 +11,7 @@ def interpretar_status(codigo_status: str) -> str:
         codigo_status (str): O código de status recebido do servidor.
 
     Returns:
-        str: A mensagem correspondente ao código de status.
+        str: A mensagem correspondente ao código de status ou None se o código for desconhecido.
     """
     status = {
         "200": "Operação realizada com sucesso.",
@@ -24,26 +24,7 @@ def interpretar_status(codigo_status: str) -> str:
         "400": "Erro na requisição.",
         "404": "Tarefa não existe."
     }
-    return status.get(codigo_status, "Erro desconhecido.")
-
-def receber_resposta(cliente_socket: socket.socket) -> str:
-    """
-    Recebe a resposta do servidor após o envio do comando.
-
-    Args:
-        cliente_socket (socket.socket): Socket da conexão com o servidor.
-
-    Returns:
-        str: A resposta recebida do servidor ou uma mensagem de erro.
-    """
-    try:
-        resposta = cliente_socket.recv(1024).decode()
-        return resposta
-    except ConnectionResetError:
-        print("Erro: Conexão com o servidor foi encerrada.")
-    except Exception as e:
-        print(f"Erro ao receber resposta: {e}")
-    return None
+    return status.get(codigo_status)  # Retorna None se o código de status não for reconhecido
 
 def conectar_ao_servidor() -> socket.socket:
     """
@@ -79,6 +60,22 @@ def mostrar_comandos() -> None:
     7. sair: Encerra o cliente.
     """)
 
+def exibir_mensagem_una(mensagem: str, ultima_mensagem: str) -> str:
+    """
+    Exibe a mensagem se ela for diferente da última mensagem.
+
+    Args:
+        mensagem (str): Mensagem atual a ser exibida.
+        ultima_mensagem (str): Última mensagem exibida.
+
+    Returns:
+        str: A mensagem exibida, ou None se for igual à última.
+    """
+    if mensagem != ultima_mensagem:
+        print(mensagem)
+        return mensagem
+    return ultima_mensagem
+
 def iniciar_cliente() -> None:
     """
     Função principal que gerencia a interação do cliente com o servidor.
@@ -91,6 +88,7 @@ def iniciar_cliente() -> None:
         return
 
     gerenciador_historico = GerenciadorHistorico()
+    ultima_mensagem = ""  # Armazena a última mensagem exibida
 
     mostrar_comandos()
 
@@ -114,28 +112,25 @@ def iniciar_cliente() -> None:
         if not comando_processado:
             continue
 
-        # Verifica a resposta antes de solicitar o ID
-        if comando.lower() in ['ler', 'atualizar', 'deletar']:
-            if not enviar_comando(cliente_socket, comando_processado):
-                break
-            resposta = receber_resposta(cliente_socket)
-
-            if resposta:
-                codigo_status, mensagem = resposta.split("|", 1)
-                if codigo_status == "205":  # Nenhuma tarefa criada
-                    print(interpretar_status(codigo_status))
-                    continue  # Não pede o ID se não houver tarefas criadas
-
         if not enviar_comando(cliente_socket, comando_processado):
             break
 
         resposta = receber_resposta(cliente_socket)
         if resposta:
             codigo_status, mensagem = resposta.split("|", 1)
+
+            # Interpreta e imprime apenas se o código de status é conhecido
             mensagem_interpretada = interpretar_status(codigo_status)
-            print(mensagem_interpretada)
-            if mensagem:
-                print(mensagem)  # Exibe apenas a mensagem adicional se houver
+            if mensagem_interpretada:
+                ultima_mensagem = exibir_mensagem_una(mensagem_interpretada, ultima_mensagem)  # Exibe apenas se for diferente
+
+            # Exibe a mensagem do servidor, especialmente o ID quando uma tarefa é criada
+            if "ID" in mensagem:
+                ultima_mensagem = exibir_mensagem_una(mensagem, ultima_mensagem)  # Exibe o ID da tarefa criada
+            elif mensagem:
+                ultima_mensagem = exibir_mensagem_una(mensagem, ultima_mensagem)  # Exibe outras mensagens
+
+            # Adiciona o comando ao histórico
             gerenciador_historico.adicionar_ao_historico(comando_processado)
 
     cliente_socket.close()

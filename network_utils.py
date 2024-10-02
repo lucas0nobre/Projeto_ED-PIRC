@@ -21,7 +21,7 @@ def enviar_comando(cliente_socket: socket.socket, comando: str) -> bool:
         print(f"Erro ao enviar comando: {e}")
         return False
 
-def receber_resposta(cliente_socket: socket.socket) -> None:
+def receber_resposta(cliente_socket: socket.socket) -> str:
     """
     Recebe a resposta do servidor após o envio do comando.
 
@@ -29,16 +29,16 @@ def receber_resposta(cliente_socket: socket.socket) -> None:
         cliente_socket (socket.socket): Socket da conexão com o servidor.
 
     Returns:
-        None
+        str: A resposta recebida do servidor ou uma mensagem de erro.
     """
     try:
         resposta = cliente_socket.recv(1024).decode()
-        codigo_status, mensagem = resposta.split("|", 1)
-        print(f"{interpretar_status(codigo_status)}: {mensagem}")
+        return resposta
     except ConnectionResetError:
         print("Erro: Conexão com o servidor foi encerrada.")
     except Exception as e:
         print(f"Erro ao receber resposta: {e}")
+    return None
 
 def interpretar_status(codigo_status: str) -> str:
     """
@@ -51,9 +51,14 @@ def interpretar_status(codigo_status: str) -> str:
         str: A mensagem correspondente ao código de status.
     """
     status = {
-        "200": "Sucesso",
-        "400": "Erro na requisição",
-        "404": "Não encontrado",
-        "500": "Erro interno do servidor"
+        "200": "Operação realizada com sucesso.",
+        "201": "Tarefa criada com sucesso.",
+        "202": "Tarefa atualizada com sucesso.",
+        "203": "Tarefa lida com sucesso.",
+        "204": "Tarefa excluída com sucesso.",
+        "205": "Nenhuma tarefa foi criada ainda.",
+        "300": "Tarefa não encontrada.",
+        "400": "Erro na requisição.",
+        "404": "Tarefa não existe."
     }
-    return status.get(codigo_status, "Código de status desconhecido")
+    return status.get(codigo_status, "Erro desconhecido.")
