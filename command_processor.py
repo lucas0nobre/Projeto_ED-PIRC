@@ -8,24 +8,22 @@ def processar_comando(comando: str) -> str:
     Returns:
         str: O comando formatado ou None se o comando for inválido.
     """
-    partes_comando = comando.split()
-
-    if partes_comando[0].lower() == "criar":
+    if comando.lower() == "criar":
         nome_tarefa = input("Digite o nome da tarefa: ")
         descricao = input("Digite a descrição da tarefa: ")
         return f"criar|{nome_tarefa}|{descricao}"
 
-    elif partes_comando[0].lower() == "atualizar":
+    elif comando.lower() == "atualizar":
         id_tarefa = input("Digite o ID da tarefa: ")
         nome_tarefa = input("Digite o novo nome da tarefa: ")
         descricao = input("Digite a nova descrição da tarefa: ")
         return f"atualizar|{id_tarefa}|{nome_tarefa}|{descricao}"
 
-    elif partes_comando[0].lower() == "ler":
+    elif comando.lower() == "ler":
         id_tarefa = input("Digite o ID da tarefa: ")
         return f"ler|{id_tarefa}"
 
-    elif partes_comando[0].lower() == "deletar":
+    elif comando.lower() == "deletar":
         id_tarefa = input("Digite o ID da tarefa: ")
         return f"deletar|{id_tarefa}"
 

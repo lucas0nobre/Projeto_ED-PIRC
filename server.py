@@ -16,59 +16,62 @@ def processar_requisicao(requisicao: str, gerenciador_tarefas: GerenciadorTarefa
     partes = requisicao.split("|")
     comando = partes[0].lower()
 
+    # Verifica se não há nenhuma tarefa criada para comandos que exigem tarefas
+    if comando in ['ler', 'atualizar', 'deletar'] and not gerenciador_tarefas.tarefas.items():
+        return "205|Nenhuma tarefa foi criada ainda."
+
     try:
         if comando == "criar":
             nome_tarefa = partes[1]
             descricao = partes[2]
             id_tarefa = gerenciador_tarefas.criar_tarefa(nome_tarefa, descricao)
-            return f"200|Tarefa criada com ID: {id_tarefa}"
+            return f"201|Tarefa criada com sucesso. ID: {id_tarefa}"
         
         elif comando == "ler":
-            if len(partes) > 1:
-                id_tarefa = int(partes[1])
-                tarefa = gerenciador_tarefas.ler_tarefa(id_tarefa)
-                if tarefa:
-                    return f"200|Tarefa {id_tarefa}: {tarefa.nome} - {tarefa.descricao}"
-                return "404|Tarefa não encontrada"
-            else:
-                tarefas = gerenciador_tarefas.ler_tarefa()
-                return "200|" + "\n".join([f"{tarefa.id_tarefa}: {tarefa.nome}" for tarefa in tarefas])
+            id_tarefa = int(partes[1])
+            tarefa = gerenciador_tarefas.ler_tarefa(id_tarefa)
+            if tarefa:
+                return f"203|{tarefa.nome} - {tarefa.descricao}"
+            return "300|Tarefa não encontrada."
 
         elif comando == "atualizar":
             id_tarefa = int(partes[1])
             nome_tarefa = partes[2]
             descricao = partes[3]
             if gerenciador_tarefas.atualizar_tarefa(id_tarefa, nome_tarefa, descricao):
-                return "200|Tarefa atualizada com sucesso"
-            return "404|Tarefa não encontrada"
+                return "202|Tarefa atualizada com sucesso."
+            return "404|Tarefa não existe."
         
         elif comando == "deletar":
             id_tarefa = int(partes[1])
             if gerenciador_tarefas.excluir_tarefa(id_tarefa):
-                return "200|Tarefa excluída com sucesso"
-            return "404|Tarefa não encontrada"
+                return "204|Tarefa excluída com sucesso."
+            return "404|Tarefa não existe."
         
         elif comando == "historico":
             historico = gerenciador_tarefas.ler_historico()
-            return "200|" + ("\n".join(historico) if historico else "Nenhum comando registrado")
+            return "200|" + ("\n".join(historico) if historico else "Nenhum comando registrado.")
 
-        return "400|Comando inválido"
+        return "400|Comando inválido."
     
     except IndexError:
-        return "400|Erro: parâmetros insuficientes"
+        return "400|Erro: parâmetros insuficientes."
     except ValueError:
-        return "400|Erro: ID da tarefa deve ser um número"
+        return "400|Erro: ID da tarefa deve ser um número."
 
-def lidar_com_cliente(conn: socket.socket, addr: tuple, gerenciador_tarefas: GerenciadorTarefas) -> None:
+def lidar_com_cliente(conn: socket.socket, addr: tuple) -> None:
     """
     Lida com cada cliente individualmente, processando as requisições enviadas.
 
     Args:
         conn (socket.socket): Socket de comunicação com o cliente.
         addr (tuple): Endereço do cliente.
-        gerenciador_tarefas (GerenciadorTarefas): Instância do gerenciador de tarefas.
     """
     print(f"Conectado por {addr}")
+    
+    # Cada cliente terá seu próprio gerenciador de tarefas
+    gerenciador_tarefas = GerenciadorTarefas()
+
     try:
         while True:
             dados = conn.recv(1024).decode()
@@ -86,8 +89,6 @@ def iniciar_servidor() -> None:
     """
     Inicia o servidor e fica em modo de escuta para aceitar conexões de clientes.
     """
-    gerenciador_tarefas = GerenciadorTarefas()
-    
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as servidor_socket:
             servidor_socket.bind(('localhost', 65432))
@@ -96,7 +97,8 @@ def iniciar_servidor() -> None:
             
             while True:
                 conn, addr = servidor_socket.accept()
-                thread_cliente = threading.Thread(target=lidar_com_cliente, args=(conn, addr, gerenciador_tarefas))
+                # Cada cliente é tratado de forma independente em uma thread com seu gerenciador de tarefas
+                thread_cliente = threading.Thread(target=lidar_com_cliente, args=(conn, addr))
                 thread_cliente.daemon = True
                 thread_cliente.start()
     except Exception as e:
