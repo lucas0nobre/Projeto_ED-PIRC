@@ -11,7 +11,7 @@ def processar_requisicao(requisicao: str, gerenciador_tarefas: GerenciadorTarefa
         gerenciador_tarefas (GerenciadorTarefas): Instância do gerenciador de tarefas.
 
     Returns:
-        str: Resposta a ser enviada de volta ao cliente.
+        str: Resposta com código de status e mensagem a ser enviada de volta ao cliente.
     """
     partes = requisicao.split("|")
     comando = partes[0].lower()
@@ -21,43 +21,43 @@ def processar_requisicao(requisicao: str, gerenciador_tarefas: GerenciadorTarefa
             nome_tarefa = partes[1]
             descricao = partes[2]
             id_tarefa = gerenciador_tarefas.criar_tarefa(nome_tarefa, descricao)
-            return f"Tarefa criada com ID: {id_tarefa}"
+            return f"200|Tarefa criada com ID: {id_tarefa}"
         
         elif comando == "ler":
             if len(partes) > 1:
                 id_tarefa = int(partes[1])
                 tarefa = gerenciador_tarefas.ler_tarefa(id_tarefa)
                 if tarefa:
-                    return f"Tarefa {id_tarefa}: {tarefa.nome} - {tarefa.descricao}"
-                return "Tarefa não encontrada"
+                    return f"200|Tarefa {id_tarefa}: {tarefa.nome} - {tarefa.descricao}"
+                return "404|Tarefa não encontrada"
             else:
                 tarefas = gerenciador_tarefas.ler_tarefa()
-                return "\n".join([f"{tarefa.id_tarefa}: {tarefa.nome}" for tarefa in tarefas])
+                return "200|" + "\n".join([f"{tarefa.id_tarefa}: {tarefa.nome}" for tarefa in tarefas])
 
         elif comando == "atualizar":
             id_tarefa = int(partes[1])
             nome_tarefa = partes[2]
             descricao = partes[3]
             if gerenciador_tarefas.atualizar_tarefa(id_tarefa, nome_tarefa, descricao):
-                return "Tarefa atualizada com sucesso"
-            return "Tarefa não encontrada"
+                return "200|Tarefa atualizada com sucesso"
+            return "404|Tarefa não encontrada"
         
         elif comando == "deletar":
             id_tarefa = int(partes[1])
             if gerenciador_tarefas.excluir_tarefa(id_tarefa):
-                return "Tarefa excluída com sucesso"
-            return "Tarefa não encontrada"
+                return "200|Tarefa excluída com sucesso"
+            return "404|Tarefa não encontrada"
         
         elif comando == "historico":
             historico = gerenciador_tarefas.ler_historico()
-            return "\n".join(historico) if historico else "Nenhum comando registrado"
+            return "200|" + ("\n".join(historico) if historico else "Nenhum comando registrado")
 
-        return "Comando inválido"
+        return "400|Comando inválido"
     
     except IndexError:
-        return "Erro: parâmetros insuficientes"
+        return "400|Erro: parâmetros insuficientes"
     except ValueError:
-        return "Erro: ID da tarefa deve ser um número"
+        return "400|Erro: ID da tarefa deve ser um número"
 
 def lidar_com_cliente(conn: socket.socket, addr: tuple, gerenciador_tarefas: GerenciadorTarefas) -> None:
     """

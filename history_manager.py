@@ -1,14 +1,12 @@
-from estruturas.ListaEncadeada import Lista
-
 class GerenciadorHistorico:
     """
     Classe responsável por gerenciar o histórico de comandos do cliente.
-    
+
     Attributes:
-        historico (Lista): Lista encadeada que armazena os comandos.
+        historico (list): Lista que armazena os comandos.
     """
-    def __init__(self) -> None:
-        self.historico = Lista()
+    def __init__(self):
+        self.historico = []
 
     def adicionar_ao_historico(self, comando: str) -> None:
         """
