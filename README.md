@@ -51,16 +51,27 @@ Códigos de Status
 Abaixo está a lista dos códigos de status utilizados no protocolo, juntamente com suas mensagens e descrições:
 
 Código	Mensagem	Descrição
+
 200	Operação realizada com sucesso.	A operação foi concluída com êxito.
+
 201	Tarefa criada com sucesso.	A tarefa foi criada corretamente no servidor.
+
 202	Tarefa atualizada com sucesso.	A tarefa foi atualizada com os novos dados fornecidos.
+
 203	Tarefa lida com sucesso.	A tarefa foi lida com sucesso pelo servidor.
+
 204	Tarefa excluída com sucesso.	A tarefa foi excluída corretamente do sistema.
+
 205	Nenhuma tarefa foi criada ainda.	Não há tarefas criadas no momento. O usuário deve criar uma nova tarefa.
+
 300	Tarefa não encontrada.	A tarefa solicitada não foi encontrada no sistema.
+
 400	Erro na requisição.	A requisição enviada está incompleta ou possui parâmetros inválidos.
+
 404	Tarefa não existe.	A tarefa solicitada não existe.
+
 500	Erro interno do servidor.	Ocorreu um erro interno no servidor ao processar a requisição.
+
 Instruções para Execução
 Como iniciar o servidor:
 Navegue até o diretório do projeto.
