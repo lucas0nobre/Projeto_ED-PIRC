@@ -26,7 +26,7 @@ def interpretar_status(codigo_status: str) -> str:
     }
     return status.get(codigo_status)  # Retorna None se o código de status não for reconhecido
 
-def conectar_ao_servidor() -> socket.socket:
+def conectar_ao_servidor(host: str ="localhost", port: int =9999) -> socket.socket:
     """
     Estabelece a conexão com o servidor.
 
@@ -35,7 +35,7 @@ def conectar_ao_servidor() -> socket.socket:
     """
     try:
         cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        cliente_socket.connect(('localhost', 65432))
+        cliente_socket.connect((host, port))  # Substitua '192.168.0.100' pelo IP do servidor
         print("Cliente conectado ao servidor.")
         return cliente_socket
     except ConnectionRefusedError:
@@ -83,7 +83,8 @@ def iniciar_cliente() -> None:
     Returns:
         None
     """
-    cliente_socket = conectar_ao_servidor()
+    host= input("digite o endereço o ip do servidor:")
+    cliente_socket = conectar_ao_servidor(host = host)
     if not cliente_socket:
         return
 
@@ -137,3 +138,4 @@ def iniciar_cliente() -> None:
 
 if __name__ == "__main__":
     iniciar_cliente()
+
